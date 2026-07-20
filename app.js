@@ -11,12 +11,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const prevTitle = document.getElementById('prevArticleTitle');
   const nextTitle = document.getElementById('nextArticleTitle');
 
+  // Handle GitHub Pages 404 redirect recovery
+  (function handleGitHubRedirect() {
+    const redirect = sessionStorage.redirect;
+    delete sessionStorage.redirect;
+    if (redirect && redirect !== location.href) {
+      history.replaceState(null, null, redirect);
+    }
+  })();
+
   // 1. Toggle Sidebar when clicking Header Logo
   logoToggle.addEventListener('click', () => {
     sidebar.classList.toggle('collapsed');
   });
 
-  // 2. Dynamic Article Loader with Live Cache-Busting
+  // Helper to resolve base repository path for GitHub Pages or local servers
+  function getBasePath() {
+    const path = window.location.pathname;
+    // Extract repository subfolder if hosted under github.io/repo-name/
+    const match = path.match(/^(\/[^\/]+)?\/articles/);
+    return match && match[1] ? match[1] : '';
+  }
+
+  // 2. Dynamic Article Loader with Cache-Busting
   async function loadArticle(slug, pushToHistory = true) {
     if (!slug) return;
     
@@ -25,9 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
     articleContainer.innerHTML = '<p class="loading-text">Loading article...</p>';
     articleNav.style.display = 'none';
 
-    // Prevent caching so topic updates display immediately
-    const articlePath = `/articles/${slug}.html?t=${Date.now()}`;
-    const cleanUrl = `/articles/${slug}`;
+    const basePath = getBasePath();
+    // Fetch directly using relative path from repository root
+    const articlePath = `${basePath}/articles/${slug}.html?t=${Date.now()}`;
+    const cleanUrl = `${basePath}/articles/${slug}`;
 
     try {
       const response = await fetch(articlePath);
@@ -110,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. Sidebar Link Clicks
+  // 5. Intercept Sidebar Link Clicks
   articleList.addEventListener('click', (e) => {
     const targetLink = e.target.closest('.nav-link');
     if (!targetLink) return;
