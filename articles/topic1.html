@@ -1,115 +1,214 @@
-<h1>Topic 1: Execution Lifecycle & Routing Engine</h1>
-<p style="color: var(--text-muted); font-size: 0.95rem;">Deep Dive into Single-Page Architecture & Route Resolution</p>
+<style>
+    body { background-color: #0b0f19; color: #f1f5f9; }
 
-<h2>Overview</h2>
-<p>In high-scale documentation systems, traditional full-page reloads introduce severe performance overhead[cite: 1]. Our front-end routing layer uses the HTML5 <strong>History API</strong> alongside non-blocking asynchronous payload fetching[cite: 1]. This ensures clean URL states without hash fragments (<code>#</code>) and avoids state crashes on page refresh[cite: 1].</p>
+    :root {
+        --bg-color: #0b0f19;
+        --card-bg: #151d30;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --accent: #ff6d00;
+        --accent-light: rgba(255, 109, 0, 0.1);
+        --border: #22314d;
+        --code-bg: #070a12;
+        --code-text: #cbd5e1;
+    }
 
-<p>The routing pipeline relies on three main architecture pillars[cite: 1]:</p>
-<ul>
-  <li><strong>URL Mapping:</strong> Real-time mapping between the browser path and local content payloads[cite: 1].</li>
-  <li><strong>Cache Invalidation:</strong> Query-string timestamp injections to reflect article updates immediately[cite: 1].</li>
-  <li><strong>Symmetric Navigation:</strong> Dynamic recalculation of neighboring sidebar items[cite: 1].</li>
-</ul>
+    h1 {
+        font-size: 2.25rem;
+        color: var(--accent);
+        margin-bottom: 20px;
+        line-height: 1.3;
+    }
 
-<h2>Route Resolution Mechanism</h2>
-<p>When a client opens a route like <span class="math-inline">/articles/topic1</span> directly or hits refresh, the route resolver parses the current location pathname[cite: 1].</p>
+    h2 {
+        font-size: 1.5rem;
+        color: var(--accent);
+        margin-top: 40px;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--border);
+    }
+
+    p { margin-bottom: 20px; color: var(--text-main); }
+    ul, ol { margin-bottom: 20px; padding-left: 24px; color: var(--text-main); }
+    li { margin-bottom: 8px; }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background-color: rgba(7, 10, 18, 0.4);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-main);
+    }
+
+    th { background-color: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+    .math-block {
+        background-color: var(--code-bg);
+        padding: 16px;
+        border-left: 4px solid var(--accent);
+        font-family: monospace;
+        margin: 20px 0;
+        border-radius: 0 8px 8px 0;
+        color: #e2e8f0;
+    }
+
+    .math-inline {
+        font-family: monospace;
+        background-color: rgba(255, 109, 0, 0.15);
+        color: #ff9e40;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .boxed {
+        border: 2px solid var(--accent);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: var(--accent);
+        display: inline-block;
+        background-color: var(--accent-light);
+    }
+
+    .tabs { display: flex; flex-wrap: wrap; margin: 20px 0; }
+    .tabs label {
+        padding: 10px 20px;
+        cursor: pointer;
+        background: rgba(7, 10, 18, 0.4);
+        border: 1px solid var(--border);
+        border-bottom: none;
+        color: var(--text-muted);
+        font-weight: 600;
+        border-radius: 6px 6px 0 0;
+        margin-right: 4px;
+    }
+    .tabs input[type="radio"] { display: none; }
+    .tabs .tab-content {
+        width: 100%;
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 0 6px 6px 6px;
+        display: none;
+    }
+    #tab-cpp-t1:checked ~ label[for="tab-cpp-t1"],
+    #tab-python-t1:checked ~ label[for="tab-python-t1"] {
+        background: var(--code-bg);
+        color: var(--accent);
+        border-top: 2px solid var(--accent);
+    }
+    #tab-cpp-t1:checked ~ #content-cpp-t1,
+    #tab-python-t1:checked ~ #content-python-t1 { display: block; }
+
+    pre {
+        background-color: var(--code-bg);
+        color: var(--code-text);
+        padding: 20px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: monospace;
+        border: 1px solid var(--border);
+    }
+
+    .keyword { color: #ff7b72; }
+    .type { color: #79c0ff; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+
+    .flow-diagram {
+        font-family: monospace;
+        background: var(--code-bg);
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        white-space: pre;
+        color: #ff9e40;
+        margin: 20px 0;
+        border: 1px solid var(--border);
+    }
+
+    .lemma {
+        background: rgba(7, 10, 18, 0.3);
+        border: 1px solid var(--border);
+        padding: 16px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    .lemma-title { font-weight: bold; color: var(--accent); margin-bottom: 8px; }
+</style>
+
+<h1>Execution Lifecycle & Routing Engine</h1>
+
+<h2>Introduction</h2>
+<p>In high-scale documentation hubs, traditional full-page reloads introduce severe performance overheads. Our front-end routing layer uses the HTML5 <strong>History API</strong> alongside non-blocking asynchronous payload fetching. This ensures clean URL states without hash fragments (<span class="math-inline">#</span>) and eliminates state crashes when refreshing pages.</p>
+
+<h2>Routing Pipeline</h2>
+<p>Given a URL path <span class="math-inline">/articles/topic1</span>, the route resolver extracts the slug and dynamically requests the snippet:</p>
 
 <div class="math-block">
-  path = window.location.pathname<br>
-  slug = path.match(/\/articles\/([^\/\?#]+)/)[1]
+    fetchPath = appRoot + "/articles/" + slug + ".html?t=" + Date.now()
 </div>
-
-<p>If a match is established, the runtime fetches <span class="math-inline">/articles/{slug}.html</span> asynchronously[cite: 1]. Otherwise, it gracefully falls back to the primary entry point[cite: 1].</p>
 
 <h2>Algorithm Flow</h2>
 <div class="flow-diagram">
-User Action (Click / Refresh)
+User Action
  │
  ▼
-Extract Slug from Pathname
+Extract Slug from Path
  │
  ▼
-Fetch Payload with Cache-Bust Timestamp
+Fetch Payload with Timestamp
  │
  ▼
 Inject Markup into Article Container
  │
  ▼
-Update History State & Highlight Link
- │
- ▼
-Recalculate Prev/Next Controls
+Update History & Highlight Sidebar
 </div>
 
-<h2>Correctness & Stability</h2>
+<h2>Correctness & Guarantees</h2>
 <div class="lemma">
-    <div class="lemma-title">Lemma 1: Stale Cache Elimination</div>
-    <p>By appending <span class="math-inline">?t=Date.now()</span> to every outbound request, browser cache policies are overridden, guaranteeing immediate reflection when updating article content[cite: 1].</p>
-</div>
-
-<div class="lemma">
-    <div class="lemma-title">Lemma 2: Zero-Hash State Integrity</div>
-    <p>Using <span class="math-inline">history.pushState()</span> allows URL updates without forcing server roundtrips, maintaining single-page app (SPA) performance across all interactions[cite: 1].</p>
+    <div class="lemma-title">Lemma 1: Cache Elimination</div>
+    <p>By appending <span class="math-inline">?t=Date.now()</span> to every outbound request, browser cache traps are bypassed, guaranteeing that edits to <span class="math-inline">topic1.html</span> take effect immediately.</p>
 </div>
 
 <h2>Complexity Analysis</h2>
 <ul>
-    <li><strong>Route Resolution:</strong> Evaluated in <span class="math-inline">O(1)</span> constant time via regular expression matching[cite: 1].</li>
-    <li><strong>DOM Injection:</strong> Direct tree manipulation bounded by <span class="math-inline">O(k)</span>, where <span class="math-inline">k</span> is the length of the HTML snippet[cite: 1].</li>
-    <li><strong>Navigation Recalculation:</strong> Traverses array items in <span class="math-inline">O(N)</span> where <span class="math-inline">N</span> is the total number of articles[cite: 1].</li>
+    <li><strong>Route Resolution:</strong> Evaluated in <span class="math-inline">O(1)</span> time.</li>
+    <li><strong>DOM Injection:</strong> Bounded by payload size <span class="math-inline">O(k)</span>.</li>
 </ul>
-<p><strong>Overall Route Resolution Time:</strong> <span class="boxed">O(1)</span></p>
-<p><strong>Overall Memory Footprint:</strong> <span class="boxed">O(N)</span></p>
+<p><strong>Overall Resolution Time:</strong> <span class="boxed">O(1)</span></p>
 
-<h2>Code Implementation</h2>
-
+<h2>Implementation Code</h2>
 <div class="tabs">
-    <input type="radio" id="tab-cpp" name="code-tabs" checked>
-    <label for="tab-cpp">JavaScript Engine</label>
+    <input type="radio" id="tab-cpp-t1" name="code-tabs-t1" checked>
+    <label for="tab-cpp-t1">JavaScript</label>
     
-    <input type="radio" id="tab-python" name="code-tabs">
-    <label for="tab-python">Python (Server Rewrite)</label>
+    <input type="radio" id="tab-python-t1" name="code-tabs-t1">
+    <label for="tab-python-t1">Python</label>
     
-    <div class="tab-content" id="content-cpp">
-        <pre><span class="keyword">async function</span> <span class="function">loadArticle</span>(<span class="code-text">slug</span>, <span class="code-text">pushToHistory</span> = <span class="keyword">true</span>) {
-    <span class="keyword">if</span> (!<span class="code-text">slug</span>) <span class="keyword">return</span>;
-
-    <span class="keyword">const</span> <span class="code-text">appRoot</span> = <span class="function">getAppRoot</span>();
-    <span class="keyword">const</span> <span class="code-text">fetchPath</span> = <span class="string">`${appRoot}/articles/${slug}.html?t=${Date.now()}`</span>;
-    <span class="keyword">const</span> <span class="code-text">displayUrl</span> = <span class="string">`${appRoot}/articles/${slug}`</span>;
-
-    <span class="keyword">try</span> {
-        <span class="keyword">const</span> <span class="code-text">response</span> = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="code-text">fetchPath</span>);
-        <span class="keyword">if</span> (!<span class="code-text">response</span>.ok) <span class="keyword">throw new</span> <span class="type">Error</span>(<span class="string">"Fetch failed"</span>);
-
-        <span class="keyword">const</span> <span class="code-text">html</span> = <span class="keyword">await</span> <span class="code-text">response</span>.<span class="function">text</span>();
-        <span class="code-text">articleContainer</span>.innerHTML = <span class="code-text">html</span>;
-
-        <span class="keyword">if</span> (<span class="code-text">pushToHistory</span>) {
-            <span class="code-text">history</span>.<span class="function">pushState</span>({ <span class="code-text">slug</span> }, <span class="string">""</span>, <span class="code-text">displayUrl</span>);
-        }
-    } <span class="keyword">catch</span> (<span class="code-text">err</span>) {
-        <span class="code-text">console</span>.<span class="function">error</span>(<span class="code-text">err</span>);
-    }
+    <div class="tab-content" id="content-cpp-t1">
+        <pre><span class="keyword">async function</span> <span class="function">loadArticle</span>(<span class="code-text">slug</span>) {
+    <span class="keyword">const</span> <span class="code-text">fetchPath</span> = <span class="string">`/articles/${slug}.html?t=${Date.now()}`</span>;
+    <span class="keyword">const</span> <span class="code-text">res</span> = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="code-text">fetchPath</span>);
+    <span class="keyword">const</span> <span class="code-text">html</span> = <span class="keyword">await</span> <span class="code-text">res</span>.<span class="function">text</span>();
+    <span class="code-text">document</span>.<span class="function">getElementById</span>(<span class="string">'articleContainer'</span>).innerHTML = <span class="code-text">html</span>;
 }</pre>
     </div>
     
-    <div class="tab-content" id="content-python">
-        <pre><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, send_from_directory
+    <div class="tab-content" id="content-python-t1">
+        <pre><span class="keyword">import</span> time
 
-app = Flask(__name__, static_folder=<span class="string">'.'</span>)
-
-<span class="keyword">@app.route</span>(<span class="string">'/'</span>)
-<span class="keyword">@app.route</span>(<span class="string">'/articles/&lt;path:fallback&gt;'</span>)
-<span class="keyword">def</span> <span class="function">serve_spa</span>(fallback=<span class="type">None</span>):
-    <span class="comment"># Route all subpaths back to index.html for client-side resolution</span>
-    <span class="keyword">return</span> send_from_directory(<span class="string">'.'</span>, <span class="string">'index.html'</span>)</pre>
+<span class="keyword">def</span> <span class="function">get_cache_bust_path</span>(slug: <span class="type">str</span>) -&gt; <span class="type">str</span>:
+    timestamp = int(time.time() * <span class="number">1000</span>)
+    <span class="keyword">return</span> f<span class="string">"/articles/{slug}.html?t={timestamp}"</span></pre>
     </div>
 </div>
-
-<h2>Key Takeaways</h2>
-<ul>
-    <li>Keep state synchronized across <strong>URL location</strong>, <strong>DOM rendering</strong>, and <strong>sidebar active styles</strong>[cite: 1].</li>
-    <li>Prevent cache traps by adding dynamic timestamps to static asset fetches[cite: 1].</li>
-    <li>Ensure smooth scroll restoration when moving between sequential pages[cite: 1].</li>
-</ul>

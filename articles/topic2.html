@@ -1,86 +1,202 @@
-<h1>Topic 2: Responsive Folding & Theme Engine</h1>
-<p style="color: var(--text-muted); font-size: 0.95rem;">Designing Elastic Navigation & CSS Variable Design Systems</p>
+<style>
+    body { background-color: #0b0f19; color: #f1f5f9; }
 
-<h2>Overview</h2>
-<p>Modern documentation interfaces must balance high content density with distraction-free reading environments[cite: 1]. The folding sidebar architecture lets users collapse navigation structures instantly by interacting with the primary header brand logo[cite: 1].</p>
+    :root {
+        --bg-color: #0b0f19;
+        --card-bg: #151d30;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --accent: #ff6d00;
+        --accent-light: rgba(255, 109, 0, 0.1);
+        --border: #22314d;
+        --code-bg: #070a12;
+        --code-text: #cbd5e1;
+    }
 
-<p>Key UI/UX capabilities include[cite: 1]:</p>
-<ul>
-    <li><strong>CSS Custom Properties:</strong> Centralized design tokens for colors, borders, and code blocks[cite: 1].</li>
-    <li><strong>Zero-Jank Transitions:</strong> Hardware-accelerated drawer sliding using cubic-bezier timing functions[cite: 1].</li>
-    <li><strong>Adaptive Viewports:</strong> Mobile-friendly layout recalculations for narrower screens[cite: 1].</li>
-</ul>
+    h1 {
+        font-size: 2.25rem;
+        color: var(--accent);
+        margin-bottom: 20px;
+        line-height: 1.3;
+    }
 
-<h2>Design Token Configuration</h2>
-<p>The interface relies on dark design tokens configured inside the global CSS root context[cite: 1]:</p>
+    h2 {
+        font-size: 1.5rem;
+        color: var(--accent);
+        margin-top: 40px;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--border);
+    }
+
+    p { margin-bottom: 20px; color: var(--text-main); }
+    ul, ol { margin-bottom: 20px; padding-left: 24px; color: var(--text-main); }
+    li { margin-bottom: 8px; }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background-color: rgba(7, 10, 18, 0.4);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-main);
+    }
+
+    th { background-color: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+    .math-block {
+        background-color: var(--code-bg);
+        padding: 16px;
+        border-left: 4px solid var(--accent);
+        font-family: monospace;
+        margin: 20px 0;
+        border-radius: 0 8px 8px 0;
+        color: #e2e8f0;
+    }
+
+    .math-inline {
+        font-family: monospace;
+        background-color: rgba(255, 109, 0, 0.15);
+        color: #ff9e40;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .tabs { display: flex; flex-wrap: wrap; margin: 20px 0; }
+    .tabs label {
+        padding: 10px 20px;
+        cursor: pointer;
+        background: rgba(7, 10, 18, 0.4);
+        border: 1px solid var(--border);
+        border-bottom: none;
+        color: var(--text-muted);
+        font-weight: 600;
+        border-radius: 6px 6px 0 0;
+        margin-right: 4px;
+    }
+    .tabs input[type="radio"] { display: none; }
+    .tabs .tab-content {
+        width: 100%;
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 0 6px 6px 6px;
+        display: none;
+    }
+    #tab-css-t2:checked ~ label[for="tab-css-t2"],
+    #tab-js-t2:checked ~ label[for="tab-js-t2"] {
+        background: var(--code-bg);
+        color: var(--accent);
+        border-top: 2px solid var(--accent);
+    }
+    #tab-css-t2:checked ~ #content-css-t2,
+    #tab-js-t2:checked ~ #content-js-t2 { display: block; }
+
+    pre {
+        background-color: var(--code-bg);
+        color: var(--code-text);
+        padding: 20px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: monospace;
+        border: 1px solid var(--border);
+    }
+
+    .keyword { color: #ff7b72; }
+    .type { color: #79c0ff; }
+    .function { color: #d2a8ff; }
+    .string { color: #a5d6ff; }
+
+    .flow-diagram {
+        font-family: monospace;
+        background: var(--code-bg);
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        white-space: pre;
+        color: #ff9e40;
+        margin: 20px 0;
+        border: 1px solid var(--border);
+    }
+
+    .lemma {
+        background: rgba(7, 10, 18, 0.3);
+        border: 1px solid var(--border);
+        padding: 16px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    .lemma-title { font-weight: bold; color: var(--accent); margin-bottom: 8px; }
+</style>
+
+<h1>Responsive Folding & Theme Engine</h1>
+
+<h2>Introduction</h2>
+<p>Modern documentation portals must offer high content density while maintaining a clean, distraction-free viewing layout. The folding sidebar engine enables quick drawer collapsing whenever the user interacts with the main header logo.</p>
+
+<h2>Design Tokens</h2>
+<p>The visual system uses custom properties defined directly in the root container:</p>
 
 <table>
     <thead>
         <tr>
-            <th>Variable Token</th>
+            <th>Property</th>
             <th>Value</th>
-            <th>UI Function</th>
+            <th>Description</th>
         </tr>
     </thead>
     <tbody>
-        <tr><td>--bg-color</td><td>#0b0f19</td><td>Global application background</td></tr>
-        <tr><td>--card-bg</td><td>#151d30</td><td>Article and container background</td></tr>
-        <tr><td>--accent</td><td>#ff6d00</td><td>Primary focus and highlight accent</td></tr>
-        <tr><td>--code-bg</td><td>#070a12</td><td>Monospaced code block background</td></tr>
+        <tr><td>--bg-color</td><td>#0b0f19</td><td>Deep dark viewport background</td></tr>
+        <tr><td>--card-bg</td><td>#151d30</td><td>Card article background</td></tr>
+        <tr><td>--accent</td><td>#ff6d00</td><td>Amber/orange theme accent</td></tr>
     </tbody>
 </table>
 
-<h2>Sidebar Folding Mechanics</h2>
-<p>When clicking the header logo, a CSS class toggles on the sidebar container[cite: 1]:</p>
+<h2>Collapsible Drawer Mechanics</h2>
+<p>Toggling the <span class="math-inline">.collapsed</span> class applies a negative margin shift equal to the drawer width:</p>
 
 <div class="math-block">
-  .sidebar.collapsed {<br>
-  &nbsp;&nbsp;margin-left: calc(-1 * var(--sidebar-width));<br>
-  }
+    margin-left = -1 * sidebarWidth = -280px
 </div>
 
-<p>This layout shift is optimized for standard rendering engines using hardware acceleration[cite: 1]:</p>
-
+<h2>Algorithm Flow</h2>
 <div class="flow-diagram">
 User Clicks Logo
  │
  ▼
-Toggle '.collapsed' Class
+Toggle .collapsed Class
  │
  ▼
-CSS Transition Triggers Margin Shift
+CSS Transitions Margin Shift
  │
  ▼
-Main Article Area Expands Automatically
+Article Card Adjusts Layout
 </div>
 
-<h2>Layout Proofs</h2>
+<h2>Layout Proof</h2>
 <div class="lemma">
-    <div class="lemma-title">Lemma 1: Layout Thrashing Prevention</div>
-    <p>By shifting sidebars via <span class="math-inline">margin-left</span> and applying <span class="math-inline">will-change: margin-left</span>, layout recalculations remain confined to the navigation parent container[cite: 1].</p>
+    <div class="lemma-title">Lemma 1: Hardware Acceleration</div>
+    <p>Using <span class="math-inline">will-change: margin-left</span> instructs the browser rendering engine to optimize composite layers, preventing jank during drawer toggling.</p>
 </div>
 
 <h2>Code Implementation</h2>
-
 <div class="tabs">
-    <input type="radio" id="tab-cpp" name="code-tabs" checked>
-    <label for="tab-cpp">CSS Theme Rules</label>
+    <input type="radio" id="tab-css-t2" name="code-tabs-t2" checked>
+    <label for="tab-css-t2">CSS</label>
     
-    <input type="radio" id="tab-python" name="code-tabs">
-    <label for="tab-python">JS Toggle Listener</label>
+    <input type="radio" id="tab-js-t2" name="code-tabs-t2">
+    <label for="tab-js-t2">JavaScript</label>
     
-    <div class="tab-content" id="content-cpp">
-        <pre><span class="type">:root</span> {
-    <span class="keyword">--bg-color</span>: <span class="number">#0b0f19</span>;
-    <span class="keyword">--card-bg</span>: <span class="number">#151d30</span>;
-    <span class="keyword">--accent</span>: <span class="number">#ff6d00</span>;
-    <span class="keyword">--border</span>: <span class="number">#22314d</span>;
-}
-
-<span class="function">.sidebar</span> {
+    <div class="tab-content" id="content-css-t2">
+        <pre><span class="function">.sidebar</span> {
     <span class="type">width</span>: <span class="number">280px</span>;
     <span class="type">transition</span>: margin-left <span class="number">0.3s</span> cubic-bezier(<span class="number">0.4</span>, <span class="number">0</span>, <span class="number">0.2</span>, <span class="number">1</span>);
-    <span class="type">will-change</span>: margin-left;
 }
 
 <span class="function">.sidebar.collapsed</span> {
@@ -88,20 +204,12 @@ Main Article Area Expands Automatically
 }</pre>
     </div>
     
-    <div class="tab-content" id="content-python">
-        <pre><span class="keyword">const</span> <span class="code-text">sidebar</span> = <span class="code-text">document</span>.<span class="function">getElementById</span>(<span class="string">'sidebar'</span>);
-<span class="keyword">const</span> <span class="code-text">logoToggle</span> = <span class="code-text">document</span>.<span class="function">getElementById</span>(<span class="string">'logoToggle'</span>);
+    <div class="tab-content" id="content-js-t2">
+        <pre><span class="keyword">const</span> <span class="code-text">logoToggle</span> = <span class="code-text">document</span>.<span class="function">getElementById</span>(<span class="string">'logoToggle'</span>);
+<span class="keyword">const</span> <span class="code-text">sidebar</span> = <span class="code-text">document</span>.<span class="function">getElementById</span>(<span class="string">'sidebar'</span>);
 
-<span class="comment">// Toggle folded state on logo click</span>
 <span class="code-text">logoToggle</span>.<span class="function">addEventListener</span>(<span class="string">'click'</span>, () =&gt; {
     <span class="code-text">sidebar</span>.<span class="code-text">classList</span>.<span class="function">toggle</span>(<span class="string">'collapsed'</span>);
 });</pre>
     </div>
 </div>
-
-<h2>Key Takeaways</h2>
-<ul>
-    <li>Use <strong>CSS custom variables</strong> to manage themes cleanly across large documentation portals[cite: 1].</li>
-    <li>Provide clear visual feedback with high-contrast active states and distinct callout boxes[cite: 1].</li>
-    <li>Combine pure CSS interactions with lightweight JS toggles for maximal performance[cite: 1].</li>
-</ul>

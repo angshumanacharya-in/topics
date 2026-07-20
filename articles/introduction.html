@@ -1,23 +1,107 @@
+<style>
+    body { background-color: #0b0f19; color: #f1f5f9; }
+    
+    :root {
+        --bg-color: #0b0f19;
+        --card-bg: #151d30;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --accent: #ff6d00;
+        --accent-light: rgba(255, 109, 0, 0.1);
+        --border: #22314d;
+        --code-bg: #070a12;
+        --code-text: #cbd5e1;
+    }
+
+    h1 {
+        font-size: 2.25rem;
+        color: var(--accent);
+        margin-bottom: 20px;
+        line-height: 1.3;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        color: var(--accent);
+        margin-top: 40px;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--border);
+    }
+
+    p { margin-bottom: 20px; color: var(--text-main); }
+    ul, ol { margin-bottom: 20px; padding-left: 24px; color: var(--text-main); }
+    li { margin-bottom: 8px; }
+
+    .math-block {
+        background-color: var(--code-bg);
+        padding: 16px;
+        border-left: 4px solid var(--accent);
+        font-family: monospace;
+        margin: 20px 0;
+        border-radius: 0 8px 8px 0;
+        color: #e2e8f0;
+    }
+
+    .math-inline {
+        font-family: monospace;
+        background-color: rgba(255, 109, 0, 0.15);
+        color: #ff9e40;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .flow-diagram {
+        font-family: monospace;
+        background: var(--code-bg);
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        white-space: pre;
+        color: #ff9e40;
+        margin: 20px 0;
+        border: 1px solid var(--border);
+    }
+
+    .lemma {
+        background: rgba(7, 10, 18, 0.3);
+        border: 1px solid var(--border);
+        padding: 16px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    .lemma-title { font-weight: bold; color: var(--accent); margin-bottom: 8px; }
+</style>
+
 <h1>Introduction to the Platform</h1>
-<p style="color: #71717a; font-size: 0.9rem;">Last updated: July 2026</p>
-<hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #e4e4e7;">
 
-<p>Welcome to the official documentation hub. This platform is engineered to serve as a high-performance, single-page documentation reader designed for modular content deployment. By leveraging native web APIs, it ensures fast client-side routing without relying on heavy front-end frameworks.</p>
+<h2>Overview</h2>
+<p>Welcome to the documentation hub. This platform is built as a high-performance, single-page reader designed for modular content deployment. By leveraging native web APIs, it ensures fast client-side routing without relying on heavy front-end frameworks.</p>
 
-<h2>Core Architectural Goals</h2>
-<p>When working with large-scale documentation systems (containing hundreds of topics), traditional multi-page reloads create unnecessary network overhead. Our architecture solves this through three primary mechanics:</p>
+<h2>Core Architecture</h2>
+<p>When managing over 100+ articles, full-page reloads introduce unnecessary network overhead. Our architecture solves this through three primary mechanics:</p>
 
 <ul>
-  <li><strong>Clean Routing via HTML5 History API:</strong> URLs update dynamically using <code>pushState</code> without standard hash fragments (<code>#</code>), offering a modern, clean URL structure.</li>
-  <li><strong>Instant Cache Invalidation:</strong> Content fetches attach timestamp query parameters to bypass browser disk caching during active development.</li>
-  <li><strong>Decoupled HTML Fragments:</strong> Articles are maintained as isolated HTML snippets, keeping individual file sizes lightweight and easy to maintain.</li>
+  <li><strong>Clean Routing via HTML5 History API:</strong> URLs update dynamically using <span class="math-inline">pushState</span> without hash fragments (<span class="math-inline">#</span>).</li>
+  <li><strong>Instant Cache Invalidation:</strong> Content fetches attach timestamp query parameters to bypass browser disk caching.</li>
+  <li><strong>Decoupled HTML Snippets:</strong> Articles are maintained as isolated snippets to keep file sizes lightweight.</li>
 </ul>
 
-<div style="background-color: #f4f4f5; border-left: 4px solid #3b82f6; padding: 1rem 1.25rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0;">
-  <strong>Note for Authors:</strong> Do not include <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, or <code>&lt;body&gt;</code> wrapper tags inside these article files. Write only the markup intended for injection inside the main article container.
+<h2>System Workflow</h2>
+<div class="flow-diagram">
+Client Request
+ │
+ ▼
+HTML5 PushState Dynamic Route
+ │
+ ▼
+Asynchronous Payload Fetch
+ │
+ ▼
+DOM Injection & Dark Card Render
 </div>
 
-<h2>What You Will Learn</h2>
-<p>Throughout this documentation suite, you will explore how the system handles dynamic state transitions, responsive sidebar collapsing, and route resolution during cold page loads and browser refreshes.</p>
-
-<p>Use the sidebar on the left or the navigation buttons at the bottom of the page to move to the next chapter: <strong>Getting Started</strong>.</p>
+<div class="lemma">
+    <div class="lemma-title">Developer Note</div>
+    <p>Do not include full <span class="math-inline">&lt;html&gt;</span>, <span class="math-inline">&lt;head&gt;</span>, or <span class="math-inline">&lt;body&gt;</span> boilerplate tags inside these article snippet files. Write only the markup intended for injection inside the main article container.</p>
+</div>
