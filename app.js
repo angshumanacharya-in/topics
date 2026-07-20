@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const prevTitle = document.getElementById('prevArticleTitle');
   const nextTitle = document.getElementById('nextArticleTitle');
 
-  // Handle GitHub Pages 404 redirect recovery
+  // Recover from GitHub Pages 404 redirect script
   (function handleGitHubRedirect() {
     const redirect = sessionStorage.redirect;
     delete sessionStorage.redirect;
@@ -25,41 +25,51 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebar.classList.toggle('collapsed');
   });
 
-  // Helper to resolve base repository path for GitHub Pages or local servers
-  function getBasePath() {
+  // Helper: Get clean repository base path for GitHub Pages
+  function getAppRoot() {
     const path = window.location.pathname;
-    // Extract repository subfolder if hosted under github.io/repo-name/
-    const match = path.match(/^(\/[^\/]+)?\/articles/);
-    return match && match[1] ? match[1] : '';
+    const articlesIndex = path.indexOf('/articles');
+    if (articlesIndex !== -1) {
+      return path.substring(0, articlesIndex);
+    }
+    // Remove trailing slash if present
+    return path.endsWith('/') ? path.slice(0, -1) : path;
   }
 
-  // 2. Dynamic Article Loader with Cache-Busting
+  // 2. Dynamic Article Loader
   async function loadArticle(slug, pushToHistory = true) {
     if (!slug) return;
     
+    // Clean up slug in case a full path was passed
+    slug = slug.replace(/^.*\/articles\//, '').replace(/\.html$/, '');
+
     // Reset view & scroll to top of content
-    document.getElementById('contentArea').scrollTo({ top: 0, behavior: 'smooth' });
+    const contentArea = document.getElementById('contentArea');
+    if (contentArea) contentArea.scrollTo({ top: 0, behavior: 'smooth' });
+    
     articleContainer.innerHTML = '<p class="loading-text">Loading article...</p>';
     articleNav.style.display = 'none';
 
-    const basePath = getBasePath();
-    // Fetch directly using relative path from repository root
-    const articlePath = `${basePath}/articles/${slug}.html?t=${Date.now()}`;
-    const cleanUrl = `${basePath}/articles/${slug}`;
+    const appRoot = getAppRoot();
+    
+    // Path used for fetching actual HTML file
+    const fetchPath = `${appRoot}/articles/${slug}.html?t=${Date.now()}`;
+    // Clean URL displayed in the browser bar (No #)
+    const displayUrl = `${appRoot}/articles/${slug}`;
 
     try {
-      const response = await fetch(articlePath);
+      const response = await fetch(fetchPath);
 
       if (!response.ok) {
-        throw new Error(`Article not found (${response.status})`);
+        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
       }
 
       const htmlContent = await response.text();
       articleContainer.innerHTML = htmlContent;
 
-      // Update URL without hashes (#)
+      // Update browser URL bar cleanly
       if (pushToHistory) {
-        history.pushState({ slug }, '', cleanUrl);
+        history.pushState({ slug }, '', displayUrl);
       }
 
       updateActiveLink(slug);
@@ -67,10 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (error) {
       articleContainer.innerHTML = `
-        <h2>Article Not Found</h2>
-        <p>Could not load the requested topic. Please select another article from the sidebar.</p>
+        <div style="padding: 1rem 0;">
+          <h2>Article Not Found</h2>
+          <p>Failed to load <code>articles/${slug}.html</code>.</p>
+          <p style="color: #71717a; font-size: 0.9rem; margin-top: 0.5rem;">
+            Please check that the file exists inside your <strong>articles/</strong> folder and matches the name exact casing.
+          </p>
+        </div>
       `;
-      console.error('Fetch error:', error);
+      console.error('Fetch Error:', error);
     }
   }
 
@@ -134,7 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!targetLink) return;
 
     e.preventDefault();
-    loadArticle(targetLink.dataset.slug, true);
+    const slug = targetLink.dataset.slug;
+    if (slug) {
+      loadArticle(slug, true);
+    }
   });
 
   // 6. Handle Browser Back / Forward Navigation
@@ -149,18 +167,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // 7. Route Resolver for Direct Loads & Refreshes
   function resolveInitialRoute() {
     const path = window.location.pathname;
-    const match = path.match(/\/articles\/([^\/]+)/);
+    // Look for /articles/slug pattern in the URL
+    const match = path.match(/\/articles\/([^\/\?#]+)/);
 
     if (match && match[1]) {
       loadArticle(match[1], false);
     } else {
+      // Default to the first article listed in sidebar
       const firstLink = articleList.querySelector('.nav-link');
-      if (firstLink) {
-        loadArticle(firstLink.dataset.slug, true);
+      if (firstLink && firstLink.dataset.slug) {
+        loadArticle(firstLink.dataset.slug, false);
       }
     }
   }
 
-  // Execute on initial page load
+  // Execute on load
   resolveInitialRoute();
 });
