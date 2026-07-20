@@ -1,39 +1,115 @@
-<h1>Topic 1: Execution Lifecycle & Routing</h1>
-<p style="color: #71717a; font-size: 0.9rem;">Deep Dive into the Front-End Architecture</p>
-<hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #e4e4e7;">
+<h1>Topic 1: Execution Lifecycle & Routing Engine</h1>
+<p style="color: var(--text-muted); font-size: 0.95rem;">Deep Dive into Single-Page Architecture & Route Resolution</p>
 
-<p>This chapter provides a technical breakdown of how article requests are resolved, processed, and updated inside the DOM runtime without crashing or introducing race conditions.</p>
+<h2>Overview</h2>
+<p>In high-scale documentation systems, traditional full-page reloads introduce severe performance overhead[cite: 1]. Our front-end routing layer uses the HTML5 <strong>History API</strong> alongside non-blocking asynchronous payload fetching[cite: 1]. This ensures clean URL states without hash fragments (<code>#</code>) and avoids state crashes on page refresh[cite: 1].</p>
 
-<h2>1. Route Resolution Algorithm</h2>
-<p>When a user opens a link or refreshes the page, the client-side router executes a pattern match against <code>window.location.pathname</code>. The extraction process operates as follows:</p>
+<p>The routing pipeline relies on three main architecture pillars[cite: 1]:</p>
+<ul>
+  <li><strong>URL Mapping:</strong> Real-time mapping between the browser path and local content payloads[cite: 1].</li>
+  <li><strong>Cache Invalidation:</strong> Query-string timestamp injections to reflect article updates immediately[cite: 1].</li>
+  <li><strong>Symmetric Navigation:</strong> Dynamic recalculation of neighboring sidebar items[cite: 1].</li>
+</ul>
 
-<pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
-function resolveInitialRoute() {
-  const path = window.location.pathname;
-  const match = path.match(/\/articles\/([^\/]+)/);
+<h2>Route Resolution Mechanism</h2>
+<p>When a client opens a route like <span class="math-inline">/articles/topic1</span> directly or hits refresh, the route resolver parses the current location pathname[cite: 1].</p>
 
-  if (match && match[1]) {
-    loadArticle(match[1], false);
-  } else {
-    // Fallback to the first available topic
-    const firstLink = articleList.querySelector('.nav-link');
-    if (firstLink) loadArticle(firstLink.dataset.slug, true);
-  }
-}
-</pre>
+<div class="math-block">
+  path = window.location.pathname<br>
+  slug = path.match(/\/articles\/([^\/\?#]+)/)[1]
+</div>
 
-<h2>2. Asynchronous Fetch & Cache Management</h2>
-<p>Static file updates can sometimes be cached aggressively by web browsers. To ensure that editing an HTML file immediately reflects on the live site without hard-refreshing, every fetch request attaches a dynamic timestamp parameter:</p>
+<p>If a match is established, the runtime fetches <span class="math-inline">/articles/{slug}.html</span> asynchronously[cite: 1]. Otherwise, it gracefully falls back to the primary entry point[cite: 1].</p>
 
-<pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
-const articlePath = `/articles/${slug}.html?t=${Date.now()}`;
-</pre>
+<h2>Algorithm Flow</h2>
+<div class="flow-diagram">
+User Action (Click / Refresh)
+ │
+ ▼
+Extract Slug from Pathname
+ │
+ ▼
+Fetch Payload with Cache-Bust Timestamp
+ │
+ ▼
+Inject Markup into Article Container
+ │
+ ▼
+Update History State & Highlight Link
+ │
+ ▼
+Recalculate Prev/Next Controls
+</div>
 
-<p>This guarantees that the browser always fetches the latest modified version directly from your server while preserving clean visual paths in the address bar.</p>
+<h2>Correctness & Stability</h2>
+<div class="lemma">
+    <div class="lemma-title">Lemma 1: Stale Cache Elimination</div>
+    <p>By appending <span class="math-inline">?t=Date.now()</span> to every outbound request, browser cache policies are overridden, guaranteeing immediate reflection when updating article content[cite: 1].</p>
+</div>
 
-<h2>3. State Synchronization</h2>
-<p>Whenever an article payload successfully loads into the DOM container, two visual synchronization tasks execute automatically:</p>
-<ol style="margin-left: 1.25rem; line-height: 1.8;">
-  <li><strong>Sidebar Link Highlighting:</strong> The active class is transferred to the matching <code>data-slug</code> anchor tag.</li>
-  <li><strong>Bottom Navigation Calculation:</strong> The DOM tree calculates neighbor nodes relative to the current position to populate the <code>Previous</code> and <code>Next</code> action buttons.</li>
-</ol>
+<div class="lemma">
+    <div class="lemma-title">Lemma 2: Zero-Hash State Integrity</div>
+    <p>Using <span class="math-inline">history.pushState()</span> allows URL updates without forcing server roundtrips, maintaining single-page app (SPA) performance across all interactions[cite: 1].</p>
+</div>
+
+<h2>Complexity Analysis</h2>
+<ul>
+    <li><strong>Route Resolution:</strong> Evaluated in <span class="math-inline">O(1)</span> constant time via regular expression matching[cite: 1].</li>
+    <li><strong>DOM Injection:</strong> Direct tree manipulation bounded by <span class="math-inline">O(k)</span>, where <span class="math-inline">k</span> is the length of the HTML snippet[cite: 1].</li>
+    <li><strong>Navigation Recalculation:</strong> Traverses array items in <span class="math-inline">O(N)</span> where <span class="math-inline">N</span> is the total number of articles[cite: 1].</li>
+</ul>
+<p><strong>Overall Route Resolution Time:</strong> <span class="boxed">O(1)</span></p>
+<p><strong>Overall Memory Footprint:</strong> <span class="boxed">O(N)</span></p>
+
+<h2>Code Implementation</h2>
+
+<div class="tabs">
+    <input type="radio" id="tab-cpp" name="code-tabs" checked>
+    <label for="tab-cpp">JavaScript Engine</label>
+    
+    <input type="radio" id="tab-python" name="code-tabs">
+    <label for="tab-python">Python (Server Rewrite)</label>
+    
+    <div class="tab-content" id="content-cpp">
+        <pre><span class="keyword">async function</span> <span class="function">loadArticle</span>(<span class="code-text">slug</span>, <span class="code-text">pushToHistory</span> = <span class="keyword">true</span>) {
+    <span class="keyword">if</span> (!<span class="code-text">slug</span>) <span class="keyword">return</span>;
+
+    <span class="keyword">const</span> <span class="code-text">appRoot</span> = <span class="function">getAppRoot</span>();
+    <span class="keyword">const</span> <span class="code-text">fetchPath</span> = <span class="string">`${appRoot}/articles/${slug}.html?t=${Date.now()}`</span>;
+    <span class="keyword">const</span> <span class="code-text">displayUrl</span> = <span class="string">`${appRoot}/articles/${slug}`</span>;
+
+    <span class="keyword">try</span> {
+        <span class="keyword">const</span> <span class="code-text">response</span> = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="code-text">fetchPath</span>);
+        <span class="keyword">if</span> (!<span class="code-text">response</span>.ok) <span class="keyword">throw new</span> <span class="type">Error</span>(<span class="string">"Fetch failed"</span>);
+
+        <span class="keyword">const</span> <span class="code-text">html</span> = <span class="keyword">await</span> <span class="code-text">response</span>.<span class="function">text</span>();
+        <span class="code-text">articleContainer</span>.innerHTML = <span class="code-text">html</span>;
+
+        <span class="keyword">if</span> (<span class="code-text">pushToHistory</span>) {
+            <span class="code-text">history</span>.<span class="function">pushState</span>({ <span class="code-text">slug</span> }, <span class="string">""</span>, <span class="code-text">displayUrl</span>);
+        }
+    } <span class="keyword">catch</span> (<span class="code-text">err</span>) {
+        <span class="code-text">console</span>.<span class="function">error</span>(<span class="code-text">err</span>);
+    }
+}</pre>
+    </div>
+    
+    <div class="tab-content" id="content-python">
+        <pre><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, send_from_directory
+
+app = Flask(__name__, static_folder=<span class="string">'.'</span>)
+
+<span class="keyword">@app.route</span>(<span class="string">'/'</span>)
+<span class="keyword">@app.route</span>(<span class="string">'/articles/&lt;path:fallback&gt;'</span>)
+<span class="keyword">def</span> <span class="function">serve_spa</span>(fallback=<span class="type">None</span>):
+    <span class="comment"># Route all subpaths back to index.html for client-side resolution</span>
+    <span class="keyword">return</span> send_from_directory(<span class="string">'.'</span>, <span class="string">'index.html'</span>)</pre>
+    </div>
+</div>
+
+<h2>Key Takeaways</h2>
+<ul>
+    <li>Keep state synchronized across <strong>URL location</strong>, <strong>DOM rendering</strong>, and <strong>sidebar active styles</strong>[cite: 1].</li>
+    <li>Prevent cache traps by adding dynamic timestamps to static asset fetches[cite: 1].</li>
+    <li>Ensure smooth scroll restoration when moving between sequential pages[cite: 1].</li>
+</ul>

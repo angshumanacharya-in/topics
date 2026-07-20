@@ -1,48 +1,107 @@
-<h1>Topic 2: Advanced Layout Customization</h1>
-<p style="color: #71717a; font-size: 0.9rem;">Styling, Responsiveness, and Extensions</p>
-<hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #e4e4e7;">
+<h1>Topic 2: Responsive Folding & Theme Engine</h1>
+<p style="color: var(--text-muted); font-size: 0.95rem;">Designing Elastic Navigation & CSS Variable Design Systems</p>
 
-<p>Now that you understand routing and execution lifecycle, this chapter focuses on modifying and scaling the user interface to suit customized themes and complex article content.</p>
+<h2>Overview</h2>
+<p>Modern documentation interfaces must balance high content density with distraction-free reading environments[cite: 1]. The folding sidebar architecture lets users collapse navigation structures instantly by interacting with the primary header brand logo[cite: 1].</p>
 
-<h2>Customizing CSS Variables</h2>
-<p>The core styling system uses modern CSS custom properties. You can easily modify colors and sizing directly inside <code>style.css</code> without hunting through nested rules:</p>
-
-<pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
-:root {
-  --header-bg: #09090b;      /* Deep black header background */
-  --header-text: #ffffff;    /* Header font color */
-  --sidebar-bg: #18181b;    /* Sidebar background */
-  --sidebar-text: #a1a1aa;  /* Default sidebar text color */
-  --active-color: #3b82f6;  /* Highlight accent color */
-  --sidebar-width: 280px;   /* Width of sidebar drawer */
-}
-</pre>
-
-<h2>Handling Long Articles & Scroll Restoration</h2>
-<p>When switching between topics using the Previous and Next controls at the bottom of an article, the viewport scroll position resets smoothly back to top zero:</p>
-
-<pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
-document.getElementById('contentArea').scrollTo({ top: 0, behavior: 'smooth' });
-</pre>
-<pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
-document.getElementById('contentArea').scrollTo({ top: 0, behavior: 'smooth' });
-</pre><pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
-document.getElementById('contentArea').scrollTo({ top: 0, behavior: 'smooth' });
-</pre>
-
-<pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
-document.getElementById('contentArea').scrollTo({ top: 0, behavior: 'smooth' });
-</pre>
-
-<h2>Scaling Up to 100+ Topics</h2>
-<p>As you add dozens or hundreds of HTML files into your <code>articles/</code> directory, keep the following tips in mind for maximum performance and clean organization:</p>
-
-<ul style="margin-left: 1.25rem; line-height: 1.8;">
-  <li>Keep file slugs consistent and lower-case (e.g., <code>database-indexing.html</code>).</li>
-  <li>Ensure every new article link in <code>index.html</code> has an accurate <code>data-slug="..."</code> property.</li>
-  <li>Break long topics into digestible subheadings (<code>&lt;h2&gt;</code> and <code>&lt;h3&gt;</code>) to preserve visual clarity.</li>
+<p>Key UI/UX capabilities include[cite: 1]:</p>
+<ul>
+    <li><strong>CSS Custom Properties:</strong> Centralized design tokens for colors, borders, and code blocks[cite: 1].</li>
+    <li><strong>Zero-Jank Transitions:</strong> Hardware-accelerated drawer sliding using cubic-bezier timing functions[cite: 1].</li>
+    <li><strong>Adaptive Viewports:</strong> Mobile-friendly layout recalculations for narrower screens[cite: 1].</li>
 </ul>
 
-<div style="background-color: #f4f4f5; border-left: 4px solid #10b981; padding: 1rem 1.25rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0;">
-  <strong>Pro Tip:</strong> Test the "Previous" button below to move back to Topic 1, or click any topic link in the left sidebar to verify smooth routing across all files!
+<h2>Design Token Configuration</h2>
+<p>The interface relies on dark design tokens configured inside the global CSS root context[cite: 1]:</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Variable Token</th>
+            <th>Value</th>
+            <th>UI Function</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>--bg-color</td><td>#0b0f19</td><td>Global application background</td></tr>
+        <tr><td>--card-bg</td><td>#151d30</td><td>Article and container background</td></tr>
+        <tr><td>--accent</td><td>#ff6d00</td><td>Primary focus and highlight accent</td></tr>
+        <tr><td>--code-bg</td><td>#070a12</td><td>Monospaced code block background</td></tr>
+    </tbody>
+</table>
+
+<h2>Sidebar Folding Mechanics</h2>
+<p>When clicking the header logo, a CSS class toggles on the sidebar container[cite: 1]:</p>
+
+<div class="math-block">
+  .sidebar.collapsed {<br>
+  &nbsp;&nbsp;margin-left: calc(-1 * var(--sidebar-width));<br>
+  }
 </div>
+
+<p>This layout shift is optimized for standard rendering engines using hardware acceleration[cite: 1]:</p>
+
+<div class="flow-diagram">
+User Clicks Logo
+ │
+ ▼
+Toggle '.collapsed' Class
+ │
+ ▼
+CSS Transition Triggers Margin Shift
+ │
+ ▼
+Main Article Area Expands Automatically
+</div>
+
+<h2>Layout Proofs</h2>
+<div class="lemma">
+    <div class="lemma-title">Lemma 1: Layout Thrashing Prevention</div>
+    <p>By shifting sidebars via <span class="math-inline">margin-left</span> and applying <span class="math-inline">will-change: margin-left</span>, layout recalculations remain confined to the navigation parent container[cite: 1].</p>
+</div>
+
+<h2>Code Implementation</h2>
+
+<div class="tabs">
+    <input type="radio" id="tab-cpp" name="code-tabs" checked>
+    <label for="tab-cpp">CSS Theme Rules</label>
+    
+    <input type="radio" id="tab-python" name="code-tabs">
+    <label for="tab-python">JS Toggle Listener</label>
+    
+    <div class="tab-content" id="content-cpp">
+        <pre><span class="type">:root</span> {
+    <span class="keyword">--bg-color</span>: <span class="number">#0b0f19</span>;
+    <span class="keyword">--card-bg</span>: <span class="number">#151d30</span>;
+    <span class="keyword">--accent</span>: <span class="number">#ff6d00</span>;
+    <span class="keyword">--border</span>: <span class="number">#22314d</span>;
+}
+
+<span class="function">.sidebar</span> {
+    <span class="type">width</span>: <span class="number">280px</span>;
+    <span class="type">transition</span>: margin-left <span class="number">0.3s</span> cubic-bezier(<span class="number">0.4</span>, <span class="number">0</span>, <span class="number">0.2</span>, <span class="number">1</span>);
+    <span class="type">will-change</span>: margin-left;
+}
+
+<span class="function">.sidebar.collapsed</span> {
+    <span class="type">margin-left</span>: <span class="number">-280px</span>;
+}</pre>
+    </div>
+    
+    <div class="tab-content" id="content-python">
+        <pre><span class="keyword">const</span> <span class="code-text">sidebar</span> = <span class="code-text">document</span>.<span class="function">getElementById</span>(<span class="string">'sidebar'</span>);
+<span class="keyword">const</span> <span class="code-text">logoToggle</span> = <span class="code-text">document</span>.<span class="function">getElementById</span>(<span class="string">'logoToggle'</span>);
+
+<span class="comment">// Toggle folded state on logo click</span>
+<span class="code-text">logoToggle</span>.<span class="function">addEventListener</span>(<span class="string">'click'</span>, () =&gt; {
+    <span class="code-text">sidebar</span>.<span class="code-text">classList</span>.<span class="function">toggle</span>(<span class="string">'collapsed'</span>);
+});</pre>
+    </div>
+</div>
+
+<h2>Key Takeaways</h2>
+<ul>
+    <li>Use <strong>CSS custom variables</strong> to manage themes cleanly across large documentation portals[cite: 1].</li>
+    <li>Provide clear visual feedback with high-contrast active states and distinct callout boxes[cite: 1].</li>
+    <li>Combine pure CSS interactions with lightweight JS toggles for maximal performance[cite: 1].</li>
+</ul>
