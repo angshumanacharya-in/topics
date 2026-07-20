@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Base</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Deep Black Header -->
+  <header class="top-header">
+    <div class="logo-container" id="logoToggle" role="button" tabindex="0" title="Toggle Sidebar">
+      <img src="logo.png" alt="Logo" class="logo-img">
+      <span class="brand-title">Article Documentation</span>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <!-- Collapsible Left Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3>Topics</h3>
+      </div>
+      <nav class="sidebar-nav">
+        <ul id="articleList">
+          <!-- Article links populate here (replace/expand with your 100+ topics) -->
+          <li><a href="/articles/introduction" data-slug="introduction" class="nav-link">Introduction</a></li>
+          <li><a href="/articles/getting-started" data-slug="getting-started" class="nav-link">Getting Started</a></li>
+          <li><a href="/articles/topic1" data-slug="topic1" class="nav-link">Topic 1</a></li>
+          <li><a href="/articles/topic2" data-slug="topic2" class="nav-link">Topic 2</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-area" id="contentArea">
+      <article class="article-body" id="articleContainer">
+        <p class="loading-text">Select an article from the sidebar to begin.</p>
+      </article>
+
+      <!-- Bottom Article Navigation -->
+      <div class="article-navigation" id="articleNav" style="display: none;">
+        <button id="prevArticleBtn" class="article-nav-btn">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title" id="prevArticleTitle"></span>
+        </button>
+        <button id="nextArticleBtn" class="article-nav-btn">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title" id="nextArticleTitle"></span>
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

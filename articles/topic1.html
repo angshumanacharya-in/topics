@@ -1,0 +1,39 @@
+<h1>Topic 1: Execution Lifecycle & Routing</h1>
+<p style="color: #71717a; font-size: 0.9rem;">Deep Dive into the Front-End Architecture</p>
+<hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #e4e4e7;">
+
+<p>This chapter provides a technical breakdown of how article requests are resolved, processed, and updated inside the DOM runtime without crashing or introducing race conditions.</p>
+
+<h2>1. Route Resolution Algorithm</h2>
+<p>When a user opens a link or refreshes the page, the client-side router executes a pattern match against <code>window.location.pathname</code>. The extraction process operates as follows:</p>
+
+<pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
+function resolveInitialRoute() {
+  const path = window.location.pathname;
+  const match = path.match(/\/articles\/([^\/]+)/);
+
+  if (match && match[1]) {
+    loadArticle(match[1], false);
+  } else {
+    // Fallback to the first available topic
+    const firstLink = articleList.querySelector('.nav-link');
+    if (firstLink) loadArticle(firstLink.dataset.slug, true);
+  }
+}
+</pre>
+
+<h2>2. Asynchronous Fetch & Cache Management</h2>
+<p>Static file updates can sometimes be cached aggressively by web browsers. To ensure that editing an HTML file immediately reflects on the live site without hard-refreshing, every fetch request attaches a dynamic timestamp parameter:</p>
+
+<pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
+const articlePath = `/articles/${slug}.html?t=${Date.now()}`;
+</pre>
+
+<p>This guarantees that the browser always fetches the latest modified version directly from your server while preserving clean visual paths in the address bar.</p>
+
+<h2>3. State Synchronization</h2>
+<p>Whenever an article payload successfully loads into the DOM container, two visual synchronization tasks execute automatically:</p>
+<ol style="margin-left: 1.25rem; line-height: 1.8;">
+  <li><strong>Sidebar Link Highlighting:</strong> The active class is transferred to the matching <code>data-slug</code> anchor tag.</li>
+  <li><strong>Bottom Navigation Calculation:</strong> The DOM tree calculates neighbor nodes relative to the current position to populate the <code>Previous</code> and <code>Next</code> action buttons.</li>
+</ol>

@@ -1,0 +1,37 @@
+<h1>Getting Started</h1>
+<p style="color: #71717a; font-size: 0.9rem;">Setup and Configuration Guide</p>
+<hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #e4e4e7;">
+
+<p>Setting up your documentation environment requires zero complex dependencies. Because the core engine runs on vanilla HTML5, CSS3, and JavaScript, you can host these files on any static web server or local development stack.</p>
+
+<h2>Prerequisites</h2>
+<p>Before launching your site, ensure you have the following installed or configured:</p>
+<ol style="margin-left: 1.25rem; line-height: 1.8;">
+  <li>A local HTTP development server (such as Node.js Express, Live Server, Python's <code>http.server</code>, or Nginx).</li>
+  <li>Basic understanding of HTML markup for formatting documentation content.</li>
+  <li>A modern web browser with JavaScript enabled.</li>
+</ol>
+
+<h2>Quick Start Guide</h2>
+<p>To initialize the documentation structure locally, verify your folder layout matches the structure below:</p>
+
+<pre style="background-color: #18181b; color: #f4f4f5; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; margin: 1.5rem 0;">
+/my-docs-site
+├── index.html
+├── style.css
+├── app.js
+├── logo.png
+└── articles/
+    ├── introduction.html
+    ├── getting-started.html
+    ├── topic1.html
+    └── topic2.html
+</pre>
+
+<h2>Testing the Routing Engine</h2>
+<p>When running a local HTTP server, open your browser and navigate through the topics. Try the following tests to confirm stability:</p>
+<ul style="margin-left: 1.25rem; line-height: 1.8;">
+  <li>Click between different sidebar topics and observe that the URL updates cleanly (e.g., <code>/articles/getting-started</code>) without standard hash fragments.</li>
+  <li>Press the <strong>F5</strong> key or refresh button on any article URL. The app should resolve the route correctly without throwing a 404 error.</li>
+  <li>Click the logo in the top-left corner to toggle the deep-black sidebar off and on.</li>
+</ul>

@@ -1,0 +1,23 @@
+<h1>Introduction to the Platform</h1>
+<p style="color: #71717a; font-size: 0.9rem;">Last updated: July 2026</p>
+<hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #e4e4e7;">
+
+<p>Welcome to the official documentation hub. This platform is engineered to serve as a high-performance, single-page documentation reader designed for modular content deployment. By leveraging native web APIs, it ensures fast client-side routing without relying on heavy front-end frameworks.</p>
+
+<h2>Core Architectural Goals</h2>
+<p>When working with large-scale documentation systems (containing hundreds of topics), traditional multi-page reloads create unnecessary network overhead. Our architecture solves this through three primary mechanics:</p>
+
+<ul>
+  <li><strong>Clean Routing via HTML5 History API:</strong> URLs update dynamically using <code>pushState</code> without standard hash fragments (<code>#</code>), offering a modern, clean URL structure.</li>
+  <li><strong>Instant Cache Invalidation:</strong> Content fetches attach timestamp query parameters to bypass browser disk caching during active development.</li>
+  <li><strong>Decoupled HTML Fragments:</strong> Articles are maintained as isolated HTML snippets, keeping individual file sizes lightweight and easy to maintain.</li>
+</ul>
+
+<div style="background-color: #f4f4f5; border-left: 4px solid #3b82f6; padding: 1rem 1.25rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0;">
+  <strong>Note for Authors:</strong> Do not include <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, or <code>&lt;body&gt;</code> wrapper tags inside these article files. Write only the markup intended for injection inside the main article container.
+</div>
+
+<h2>What You Will Learn</h2>
+<p>Throughout this documentation suite, you will explore how the system handles dynamic state transitions, responsive sidebar collapsing, and route resolution during cold page loads and browser refreshes.</p>
+
+<p>Use the sidebar on the left or the navigation buttons at the bottom of the page to move to the next chapter: <strong>Getting Started</strong>.</p>
